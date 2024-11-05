@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        List<Habit> habits = databaseHelper.getHabitsForUser(username);
+        List<Habit> habits = databaseHelper.getHabitsForUser(username); 
         habitAdapter = new HabitAdapter(habits, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(habitAdapter);

@@ -2,6 +2,7 @@ package com.example.habittracker;
 
 import android.os.Bundle;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,32 +18,44 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private HabitAdapter habitAdapter;
-    private DatabaseHelper databaseHelper;
+    private DatabaseHelper databaseHelper;  // Declarar la variable
     private String currentUsername;
-    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Inicializa el RecyclerView y el DatabaseHelper
         recyclerView = findViewById(R.id.recyclerViewHabits);
-        progressBar = findViewById(R.id.progressBar);
+        databaseHelper = new DatabaseHelper(this);  // Asegúrate de inicializar aquí
 
-        databaseHelper = new DatabaseHelper(this);
+        // Obtén el nombre de usuario del Intent
         currentUsername = getIntent().getStringExtra("username");
 
-        loadHabits();
+        if (currentUsername == null || currentUsername.isEmpty()) {
+            // Si no se recibió el username, muestra un mensaje y cierra la actividad
+            Toast.makeText(this, "Error: Nombre de usuario no recibido", Toast.LENGTH_SHORT).show();
+            finish();  // Cierra la actividad
+            return;
+        }
+
+        loadHabits(currentUsername);  // Cargar hábitos para el usuario actual
     }
 
-    private void loadHabits() {
-        List<Habit> habits = databaseHelper.getHabitsForUser(currentUsername);
+    private void loadHabits(String username) {
+        int userId = databaseHelper.getUserId(username);
+
+        if (userId == -1) {
+            Toast.makeText(this, "Error: Usuario no encontrado", Toast.LENGTH_SHORT).show();
+            finish();  // Cierra la actividad si el usuario no existe
+            return;
+        }
+
+        List<Habit> habits = databaseHelper.getHabitsForUser(username);
         habitAdapter = new HabitAdapter(habits, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(habitAdapter);
-
-        // Lógica para calcular y actualizar el progreso
-        int completedHabits = (int) habits.stream().filter(Habit::isCompleted).count();
-        progressBar.setProgress(completedHabits * 100 / habits.size());
     }
 }
+

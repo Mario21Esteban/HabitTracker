@@ -73,14 +73,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public int getUserId(String username) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT " + COLUMN_USER_ID + " FROM " + TABLE_USERS + " WHERE " + COLUMN_USERNAME + " = ?", new String[]{username});
+
+        int userId = -1;  // Si el usuario no existe, userId será -1
         if (cursor.moveToFirst()) {
-            int userId = cursor.getInt(0);
-            cursor.close();
-            return userId;
+            userId = cursor.getInt(0);
         }
         cursor.close();
-        return -1;
+        db.close();
+        return userId;
     }
+
+
 
     public void updateHabitCompletion(int habitId, boolean isCompleted) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -94,6 +97,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<Habit> getHabitsForUser(String username) {
         List<Habit> habits = new ArrayList<>();
         int userId = getUserId(username);
+
+        if (userId == -1) {
+            return habits;  // Retorna una lista vacía si el usuario no existe
+        }
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_HABITS + " WHERE " + COLUMN_USER_ID_FK + " = ?", new String[]{String.valueOf(userId)});
@@ -110,8 +117,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
         cursor.close();
+        db.close();
         return habits;
     }
+
 
     public boolean checkUser(String username) {
         SQLiteDatabase db = this.getReadableDatabase();

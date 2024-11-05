@@ -39,8 +39,9 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         if (selectedOption == R.id.rb_login) {
+            // Verifica si el usuario existe
             if (databaseHelper.checkUser(username)) {
-                // Usuario encontrado, inicia MainActivity
+                // Si el usuario existe, pasa el username a MainActivity
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 intent.putExtra("username", username);
                 startActivity(intent);
@@ -58,7 +59,8 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    
+
+
 
 }
 

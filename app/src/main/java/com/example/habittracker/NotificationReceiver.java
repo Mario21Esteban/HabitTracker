@@ -13,11 +13,10 @@ public class NotificationReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String habitName = intent.getStringExtra("habitName");
 
-        // Crear la notificación
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "habitReminder")
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle("Recordatorio de Hábito")
-                .setContentText("Es hora de completar el hábito: " + habitName)
+                .setContentText("Es hora de trabajar en: " + habitName)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true);
 
@@ -25,4 +24,6 @@ public class NotificationReceiver extends BroadcastReceiver {
         notificationManager.notify(1001, builder.build());
     }
 }
+
+
 

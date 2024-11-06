@@ -140,6 +140,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void addHabit(String name, String description, String username) {
+        int userId = getUserId(username);
+        if (userId == -1) {
+            return;  // No se guarda el hábito si el usuario no existe
+        }
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_HABIT_NAME, name);
+        values.put(COLUMN_HABIT_DESCRIPTION, description);
+        values.put(COLUMN_USER_ID_FK, userId);
+
+        db.insert(TABLE_HABITS, null, values);
+        db.close();
+    }
+
+    public void deleteHabit(int habitId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_HABITS, COLUMN_HABIT_ID + " = ?", new String[]{String.valueOf(habitId)});
+        db.close();
+    }
+
+
+
 
 
 }

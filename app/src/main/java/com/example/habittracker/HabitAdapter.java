@@ -1,6 +1,9 @@
 package com.example.habittracker;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;
@@ -8,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,12 +22,10 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
 
     private List<Habit> habitList;
     private Context context;
-    private DatabaseHelper databaseHelper;  // Instancia de DatabaseHelper
 
     public HabitAdapter(List<Habit> habitList, Context context) {
         this.habitList = habitList;
         this.context = context;
-        this.databaseHelper = new DatabaseHelper(context);  // Inicializar DatabaseHelper
     }
 
     @NonNull
@@ -38,13 +40,6 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
         Habit habit = habitList.get(position);
         holder.habitNameTextView.setText(habit.getName());
         holder.habitDescriptionTextView.setText(habit.getDescription());
-        holder.checkBoxCompleted.setChecked(habit.isCompleted());
-
-        // Marcar hábito como completado y actualizar en la base de datos
-        holder.checkBoxCompleted.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            habit.setCompleted(isChecked);
-            databaseHelper.updateHabitCompletion(habit.getId(), isChecked);  // Actualización con databaseHelper
-        });
     }
 
     @Override
@@ -54,14 +49,27 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
 
     public static class HabitViewHolder extends RecyclerView.ViewHolder {
         TextView habitNameTextView, habitDescriptionTextView;
-        CheckBox checkBoxCompleted;
 
         public HabitViewHolder(@NonNull View itemView) {
             super(itemView);
             habitNameTextView = itemView.findViewById(R.id.habitNameTextView);
             habitDescriptionTextView = itemView.findViewById(R.id.habitDescriptionTextView);
-            checkBoxCompleted = itemView.findViewById(R.id.checkBoxCompleted);
         }
     }
+
+    public void scheduleNotification(String habitName, long triggerTime) {
+        Intent intent = new Intent(context, NotificationReceiver.class);
+        intent.putExtra("habitName", habitName);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager != null) {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+            Toast.makeText(context, "Notificación programada", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 }
+
 

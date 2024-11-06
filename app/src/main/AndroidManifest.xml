@@ -26,6 +26,8 @@
         </activity>
 
         <activity android:name=".MainActivity" />
+        <activity android:name=".AddHabitActivity" />
+        <receiver android:name=".NotificationReceiver" />
 
     </application>
 
